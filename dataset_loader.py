@@ -2,9 +2,13 @@ from typing import List
 
 from bs4 import BeautifulSoup
 import re
+from selenium import webdriver
 
-from environment import dataset_path
+from cookie_engine import driver_get_with_cookies
+from environment import dataset_path, driver_path, main_page
+from operation_engine import goto_result
 from question import Question
+from question_engine import load_question_list
 
 
 # 还有一些没答案的，这里没有处理
@@ -18,7 +22,26 @@ def default_load() -> List[Question]:
         cur_text = item.text.replace(" ", "").replace("\n", "").replace("\xa0", "")
         if len(cur_text) > 0:
             result += cur_text
-    raw_question_list = re.findall("(?<=\d\.).*?:[0-9]\.[0-9](?=\d*\.\D|[一二三四五六])", result)
+    return get_questions_from_text(result)
+
+
+def local_load(path) -> List[Question]:
+    return load_question_list(path)
+
+
+def web_load() -> List[Question]:
+    driver = driver_get_with_cookies(main_page)
+    try:
+        goto_result(driver)
+        body = driver.find_elements_by_class_name("panel-group")[0]
+        result_text = body.text.replace("\n", "")
+    finally:
+        driver.quit()
+    return get_questions_from_text(result_text)
+
+
+def get_questions_from_text(raw_text) -> List[Question]:
+    raw_question_list = re.findall("(?<=\d\.).*?:[0-9]\.[0-9](?=\d*\.\D|[一二三四五六])", raw_text)
 
     question_list = []
     for question in raw_question_list:

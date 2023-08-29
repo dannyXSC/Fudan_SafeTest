@@ -6,7 +6,7 @@ from selenium import webdriver
 
 from cookie_engine import get_cookies, driver_get_with_cookies
 from dataset_loader import default_load, local_load, web_load
-from environment import driver_path, main_page, question_path, if_add_question, cookie_path
+from environment import driver_path, main_page, question_path,  cookie_path
 from operation_engine import take_exam, answer_question, answer_all_question
 from question_engine import question_list_merge, save_question_list, load_question_list
 
